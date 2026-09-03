@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import WebSocket from 'ws';
 import type { Database } from '../types/database.types.js';
 import type { LuxusClient } from './client.js';
 
@@ -32,5 +33,10 @@ export function createLuxusAdminClient(url: string, serviceRoleKey: string): Lux
   return createClient<Database>(url, serviceRoleKey, {
     auth: { persistSession: false, autoRefreshToken: false },
     global: { headers: { 'x-luxus-surface': 'api' } },
+    // Mismo motivo que en server.ts: supabase-js siempre instancia un
+    // RealtimeClient, que exige un WebSocket global — nativo recién desde
+    // Node 22. Explícito aquí también para no depender de qué versión de
+    // Node termine usando el hosting de la API.
+    realtime: { transport: WebSocket as any },
   });
 }
