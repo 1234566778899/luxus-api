@@ -6,7 +6,7 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch --env-file=.env src/index.ts",
-    "build": "tsup src/index.ts --format esm --target node20 --clean --sourcemap",
+    "build": "npm run build --prefix ../../packages/shared && tsup src/index.ts --format esm --target node20 --clean --sourcemap",
     "start": "node --env-file=.env dist/index.js",
     "typecheck": "tsc --noEmit",
     "test": "node --test --experimental-strip-types \"src/**/*.test.ts\""
