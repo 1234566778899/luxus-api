@@ -1,0 +1,42 @@
+# dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# env — NEVER commit real credentials
+.env
+.env.*
+!.env.example
+*.env.local
+
+# build output
+dist/
+build/
+.astro/
+.output/
+.vercel/
+.netlify/
+
+# supabase local
+supabase/.branches/
+supabase/.temp/
+supabase/.env
+
+# logs
+*.log
+npm-debug.log*
+logs/
+
+# os / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# test / coverage
+coverage/
+*.tsbuildinfo
+
+# uploads scratch
+tmp/
