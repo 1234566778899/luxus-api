@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import type { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
-import { enquirySchema, privateAccessSchema } from '@luxus/shared';
+import { complaintSchema, enquirySchema, formatComplaintReference, privateAccessSchema } from '@luxus/shared';
 import { badRequest, notFound } from '../plugins/errors.js';
 
 /**
@@ -143,6 +143,75 @@ export default async function publicRoutes(app: FastifyInstance): Promise<void> 
       });
 
       return reply.code(201).send({ ok: true as const });
+    },
+  );
+
+  // ── Libro de Reclamaciones ───────────────────────────────────────────────
+  r.post(
+    '/complaint-book',
+    {
+      config: { rateLimit: { max: 5, timeWindow: '10 minutes' } },
+      schema: {
+        body: complaintSchema,
+        response: {
+          201: z.object({ ok: z.literal(true), reference: z.string() }),
+        },
+      },
+    },
+    async (request, reply) => {
+      const body = request.body;
+
+      if (body.website) {
+        request.log.warn({ email: body.email }, 'Reclamo descartado por honeypot');
+        return reply.code(201).send({ ok: true as const, reference: 'discarded' });
+      }
+
+      const { data, error } = await app.supabase
+        .from('complaint_entries')
+        .insert({
+          kind: body.kind,
+          full_name: body.full_name,
+          document_type: body.document_type,
+          document_number: body.document_number,
+          email: body.email,
+          phone: body.phone ?? null,
+          address: body.address ?? null,
+          is_minor: body.is_minor,
+          guardian_name: body.guardian_name ?? null,
+          product_or_service: body.product_or_service,
+          asset_id: body.asset_id ?? null,
+          amount: body.amount ?? null,
+          detail: body.detail,
+          requested_action: body.requested_action ?? null,
+          source: 'website',
+          ip_address: request.ip,
+          user_agent: request.headers['user-agent'] ?? null,
+        } as never)
+        .select('id, entry_number')
+        .single();
+
+      if (error) {
+        request.log.error({ err: error }, 'No se pudo registrar el reclamo');
+        throw badRequest('request_failed', 'No pudimos registrar su reclamo. Inténtelo de nuevo.');
+      }
+
+      const reference = formatComplaintReference(data.entry_number);
+
+      await app.sendMail({
+        to: body.email,
+        template: 'complaint_received',
+        subject: '',
+        data: { name: body.full_name, kindLabel: body.kind, reference, detail: body.detail },
+      });
+
+      await app.audit(request, {
+        action: 'complaint.submitted',
+        entityType: 'complaint_entry',
+        entityId: data.id,
+        metadata: { kind: body.kind, reference },
+      });
+
+      return reply.code(201).send({ ok: true as const, reference });
     },
   );
 

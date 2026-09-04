@@ -45,6 +45,10 @@ const PREFERENCE_BY_TEMPLATE: Record<string, string | null> = {
   // Los correos de admisión no son opcionales: son transaccionales puros.
   private_access_approved: null,
   private_access_rejected: null,
+  // Los avisos del Libro de Reclamaciones tampoco son opcionales: son la
+  // constancia de recepción y la respuesta que exige la normativa.
+  complaint_received: null,
+  complaint_responded: null,
 };
 
 /**

@@ -2,8 +2,8 @@ import type { FastifyInstance } from 'fastify';
 import type { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import {
-  articleSchema, auditQuerySchema, LISTING_FEE_BANDS, manageUserSchema,
-  reviewAccessRequestSchema, slugify, verifyAssetSchema,
+  articleSchema, auditQuerySchema, formatComplaintReference, LISTING_FEE_BANDS, manageUserSchema,
+  respondComplaintSchema, reviewAccessRequestSchema, slugify, verifyAssetSchema,
 } from '@luxus/shared';
 import { badRequest, notFound } from '../plugins/errors.js';
 import { toCsv } from '../lib/csv.js';
@@ -125,6 +125,81 @@ export default async function adminRoutes(app: FastifyInstance): Promise<void> {
       });
 
       return { ok: true, status: 'approved', user_id: invited.user?.id };
+    },
+  );
+
+  // ══════════════════════════════════════════════════════════════════════
+  // Libro de Reclamaciones
+  // ══════════════════════════════════════════════════════════════════════
+  r.get(
+    '/admin/complaint-book',
+    {
+      ...adminOnly,
+      schema: {
+        querystring: z.object({
+          status: z.enum(['received', 'in_review', 'responded', 'closed']).default('received'),
+        }),
+      },
+    },
+    async (request) => {
+      const { data } = await app.supabase
+        .from('complaint_entries')
+        .select('*')
+        .eq('status', request.query.status)
+        .order('created_at', { ascending: false });
+      return { entries: data ?? [] };
+    },
+  );
+
+  r.post(
+    '/admin/complaint-book/respond',
+    { ...adminOnly, schema: { body: respondComplaintSchema } },
+    async (request) => {
+      const { entry_id, status, response_text } = request.body;
+
+      const { data: entry } = await app.supabase
+        .from('complaint_entries')
+        .select('*')
+        .eq('id', entry_id)
+        .maybeSingle();
+
+      if (!entry) throw notFound('Registro no encontrado.');
+
+      if (status === 'responded' && !response_text) {
+        throw badRequest('response_required', 'Escriba la respuesta antes de marcarlo como respondido.');
+      }
+
+      const patch: Record<string, unknown> = { status, updated_at: new Date().toISOString() };
+      if (response_text) patch.response_text = response_text;
+      if (status === 'responded') {
+        patch.responded_by = request.auth!.userId;
+        patch.responded_at = new Date().toISOString();
+      }
+
+      await app.supabase.from('complaint_entries').update(patch as never).eq('id', entry_id);
+
+      if (status === 'responded' && response_text) {
+        await app.sendMail({
+          to: entry.email,
+          template: 'complaint_responded',
+          subject: '',
+          data: {
+            name: entry.full_name,
+            kindLabel: entry.kind,
+            reference: formatComplaintReference(entry.entry_number),
+            responseText: response_text,
+          },
+        });
+      }
+
+      await app.audit(request, {
+        action: 'complaint.status_changed',
+        entityType: 'complaint_entry',
+        entityId: entry_id,
+        metadata: { status },
+      });
+
+      return { ok: true, status };
     },
   );
 

@@ -66,6 +66,11 @@ const dateTimeFmt = new Intl.DateTimeFormat('es-PE', {
   day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
 });
 
+/** "LX-000123" — el correlativo que ve el reclamante y el que usa el equipo. */
+export function formatComplaintReference(entryNumber: number | string): string {
+  return `LX-${String(entryNumber).padStart(6, '0')}`;
+}
+
 export function formatDate(value: string | Date | null | undefined): string {
   if (!value) return '—';
   return dateFmt.format(typeof value === 'string' ? new Date(value) : value);

@@ -20,7 +20,9 @@ export type EmailTemplate =
   | 'asset_published'
   | 'asset_changes_requested'
   | 'payment_receipt'
-  | 'subscription_past_due';
+  | 'subscription_past_due'
+  | 'complaint_received'
+  | 'complaint_responded';
 
 export interface EmailMessage {
   to: string;

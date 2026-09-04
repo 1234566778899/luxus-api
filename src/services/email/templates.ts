@@ -290,6 +290,29 @@ export function renderTemplate(message: EmailMessage, siteUrl: string): Rendered
         text: `${name}, no pudimos procesar el cobro de su ${s(d, 'planName')}.`,
       };
 
+    case 'complaint_received':
+      return {
+        subject: `Hemos recibido su ${s(d, 'kindLabel', 'reclamo')} — ${s(d, 'reference')}`,
+        html: layout(
+          'Hemos recibido su registro',
+          p(`${name}, registramos su ${s(d, 'kindLabel', 'reclamo')} en nuestro Libro de Reclamaciones con el número <strong>${s(d, 'reference')}</strong>.`) +
+            p(`Le daremos respuesta en un plazo no mayor a 30 días calendario, conforme a la normativa de protección al consumidor.`) +
+            p(`Detalle registrado: "${s(d, 'detail')}"`),
+        ),
+        text: `${name}, su ${s(d, 'kindLabel', 'reclamo')} quedó registrado con el número ${s(d, 'reference')}. Le responderemos en un plazo no mayor a 30 días calendario.`,
+      };
+
+    case 'complaint_responded':
+      return {
+        subject: `Respuesta a su ${s(d, 'kindLabel', 'reclamo')} ${s(d, 'reference')}`,
+        html: layout(
+          'Respuesta a su registro',
+          p(`${name}, esta es nuestra respuesta a su ${s(d, 'kindLabel', 'reclamo')} <strong>${s(d, 'reference')}</strong>:`) +
+            p(s(d, 'responseText')),
+        ),
+        text: `Respuesta a su ${s(d, 'kindLabel', 'reclamo')} ${s(d, 'reference')}: ${s(d, 'responseText')}`,
+      };
+
     default: {
       const exhaustive: never = message.template;
       throw new Error(`Plantilla de correo no implementada: ${String(exhaustive)}`);

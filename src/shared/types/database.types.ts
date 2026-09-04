@@ -64,6 +64,9 @@ export type ArticleStatus = 'draft' | 'review' | 'published' | 'archived';
 export type LeadKind = 'seller_pipeline' | 'buyer_enquiry';
 export type LeadStage = 'contacted' | 'interested' | 'documentation' | 'approved' | 'listed' | 'lost';
 
+export type ComplaintKind = 'reclamo' | 'queja';
+export type ComplaintStatus = 'received' | 'in_review' | 'responded' | 'closed';
+
 // ── Rows ────────────────────────────────────────────────────────────────────
 export type ProfileRow = Timestamps & {
   id: string;
@@ -676,6 +679,34 @@ export type WebhookEventRow = {
   received_at: string;
 }
 
+export type ComplaintEntryRow = {
+  id: string;
+  entry_number: number;
+  kind: ComplaintKind;
+  full_name: string;
+  document_type: string;
+  document_number: string;
+  email: string;
+  phone: string | null;
+  address: string | null;
+  is_minor: boolean;
+  guardian_name: string | null;
+  product_or_service: string;
+  asset_id: string | null;
+  amount: number | null;
+  detail: string;
+  requested_action: string | null;
+  status: ComplaintStatus;
+  response_text: string | null;
+  responded_by: string | null;
+  responded_at: string | null;
+  source: string;
+  ip_address: string | null;
+  user_agent: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export type ListingFeeBandRow = {
   tier: ListingTier;
   min_cents: number;
@@ -724,6 +755,7 @@ export type Database = {
       notifications: Table<NotificationRow>;
       email_log: Table<EmailLogRow>;
       webhook_events: Table<WebhookEventRow>;
+      complaint_entries: Table<ComplaintEntryRow>;
     };
     Views: Record<string, never>;
     Functions: {
