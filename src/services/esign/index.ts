@@ -11,7 +11,7 @@ export function createEsignProvider(config: AppConfig): EsignProvider {
       // MOCK: reemplazar por proveedor real.
       throw new Error(
         `[luxus:esign] El proveedor ${config.ESIGN_PROVIDER} aún no está implementado. ` +
-          'Implemente EsignProvider en apps/api/src/services/esign/ y regístrelo aquí.',
+          'Implemente EsignProvider en src/services/esign/ y regístrelo aquí.',
       );
     case 'mock':
     default:

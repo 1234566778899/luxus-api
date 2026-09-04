@@ -11,7 +11,7 @@ export function createScreeningProvider(config: AppConfig): ScreeningProvider {
       // MOCK: reemplazar por proveedor real.
       throw new Error(
         `[luxus:screening] El proveedor ${config.SCREENING_PROVIDER} aún no está implementado. ` +
-          'Implemente ScreeningProvider en apps/api/src/services/screening/ y regístrelo aquí.',
+          'Implemente ScreeningProvider en src/services/screening/ y regístrelo aquí.',
       );
     case 'mock':
     default:

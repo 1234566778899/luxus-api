@@ -26,7 +26,7 @@ export function createPaymentsProvider(config: AppConfig, app: FastifyInstance):
       // checkout hospedado + webhooks; falta el adaptador.
       throw new Error(
         '[luxus:payments] La pasarela local (Culqi) aún no está implementada. ' +
-          'Implemente PaymentsProvider en apps/api/src/services/payments/ y regístrela aquí.',
+          'Implemente PaymentsProvider en src/services/payments/ y regístrela aquí.',
       );
     case 'mock':
     default:

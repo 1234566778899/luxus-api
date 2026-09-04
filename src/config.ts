@@ -12,7 +12,7 @@ const schema = z.object({
 
   SUPABASE_URL: z.string().url(),
   SUPABASE_PUBLISHABLE_KEY: z.string().min(20),
-  SUPABASE_SERVICE_ROLE_KEY: z.string().min(20, 'Pegue la service_role key en apps/api/.env'),
+  SUPABASE_SERVICE_ROLE_KEY: z.string().min(20, 'Pegue la service_role key en .env'),
   SUPABASE_JWT_SECRET: z.string().optional().default(''),
 
   CORS_ORIGINS: z.string().default('http://localhost:4321'),
@@ -51,7 +51,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
       .map((i) => `  · ${i.path.join('.')}: ${i.message}`)
       .join('\n');
     throw new Error(`[luxus:api] Configuración inválida.\n${issues}\n\n` +
-      'Revise apps/api/.env (plantilla en apps/api/.env.example).');
+      'Revise .env (plantilla en .env.example).');
   }
 
   const value = parsed.data;

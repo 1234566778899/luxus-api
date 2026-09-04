@@ -14,7 +14,7 @@ export function createEmailProvider(config: AppConfig, log: FastifyInstance['log
       // MOCK: reemplazar por proveedor real.
       throw new Error(
         '[luxus:email] SendGrid aún no está implementado. ' +
-          'Implemente EmailProvider en apps/api/src/services/email/providers.ts.',
+          'Implemente EmailProvider en src/services/email/providers.ts.',
       );
     case 'mock':
     default:

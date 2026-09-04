@@ -13,7 +13,7 @@ export function createKycProvider(config: AppConfig): KycProvider {
       // para no simular una verificación que no ocurrió.
       throw new Error(
         '[luxus:kyc] El proveedor reniec_partner aún no está implementado. ' +
-          'Implemente KycProvider en apps/api/src/services/kyc/ y regístrelo aquí.',
+          'Implemente KycProvider en src/services/kyc/ y regístrelo aquí.',
       );
     case 'mock':
     default:
